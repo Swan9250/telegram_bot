@@ -1,31 +1,44 @@
+import datetime
 import json
 import telegram as tg
-from telegram.ext import Updater, CommandHandler, CallbackContext
-#from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Updater, CommandHandler, CallbackContext, JobQueue, MessageHandler, Filters
+from telegram.ext import CallbackQueryHandler
 
 #bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
+
+#chat_id_with_Swan = '177870052'
 
 
 class countGame():
     def __init__(self):
         self.bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
-        self.schet = "E 11:12 В"
-        self.pred = "E 11:12 В"
-        #self.bot = tg.Bot(self.bot_token)
+        self.schet = "E 17:22 В"
+        self.pred = "E 17:22 В"
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
         self.bot = self.updater.bot
+        self.queue = self.updater.job_queue
+        self.queue.start()
+        self.cronTasks(tg.Update)
         self.commandsHandler()
-
-        #print(self.dispatcher.chat_data[0])
         self.updater.start_polling()
         self.updater.idle()
 
-        #self.update = tg.Bot.getUpdates
+    def medicine(self, context: CallbackContext):
+#        print('popal')
+        message = "Выпей таблетки"
+        context.bot.send_message(177870052, message)
+#        print('Popal')
 
-
-
-        k = self.update()
+    def cronTasks(self, update, *args):
+#        print('run')
+#        self.queue.run_repeating(self.medicine, interval=10.0, first=0.0)
+        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+                                    time=datetime.time(hour = 13, minute=30, second=00), context=update)
+        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+                                    time=datetime.time(hour = 18, minute=30, second=00), context=update)
+#        print(self.queue.jobs())
+        
 
     def commandsHandler(self):
         self.dispatcher.add_handler(CommandHandler("hello", self.hello))
@@ -34,6 +47,9 @@ class countGame():
         self.dispatcher.add_handler(CommandHandler("EgorWin", self.Ewin))
         self.dispatcher.add_handler(CommandHandler("VovaWin", self.Vwin))
         self.dispatcher.add_handler(CommandHandler("Otkat", self.Otkat))
+#        self.dispatcher.add_handler(CallbackQueryHandler(self.cronTasks, pass_job_queue = True))
+
+ #       self.dispatcher.add_handler(CommandHandler("Timer", self.cronTasks))
 
     def update(self)->list:
         return self.bot.getUpdates()
@@ -41,20 +57,25 @@ class countGame():
     def getChatId(self, update:tg.Update):
         return update.message.chat.id
 
-    def keyboard(self):
+    def keyboardDom(self, update):
         hello = tg.KeyboardButton('/hello')
         help = tg.KeyboardButton('/help')
         Vwin = tg.KeyboardButton('/VovaWin')
         Ewin = tg.KeyboardButton('/EgorWin')
         start = tg.KeyboardButton('/start')
         Otkat = tg.KeyboardButton('/Otkat')
-        return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]])
-
+#        timer = tg.KeyboardButton('/Timer')
+        if update.message.chat.title == 'Доминирование':
+            return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]])
+        elif update.message.chat.id == 177870052:
+            return tg.ReplyKeyboardMarkup([[hello], [help], [start]])
+        else:
+            print('Лошара')
 
 
     def hello(self, update:tg.Update, context:CallbackContext):
         hello = f'Hello {update.effective_user.first_name}'
-        self.bot.sendMessage(self.getChatId(update), hello, reply_markup=self.keyboard())
+        self.bot.sendMessage(self.getChatId(update), hello, reply_markup=self.keyboardDom(update))
 
     def help(self, update:tg.Update, context:CallbackContext):
         help = f'Say /hello to start'
@@ -90,6 +111,7 @@ class countGame():
 
     def get_chat_id(self):
         self.chat_id = self.updater.message_id
+
 
 
 if __name__ == '__main__':
