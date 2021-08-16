@@ -75,7 +75,7 @@ class countGame():
 
     def hello(self, update:tg.Update, context:CallbackContext):
         hello = f'Hello {update.effective_user.first_name}'
-        self.bot.sendMessage(self.getChatId(update), hello, allow_sending_without_reply=True, reply_markup=self.keyboardDom(update))
+        self.bot.sendMessage(self.getChatId(update), hello, reply_markup=self.keyboardDom(update))
 
     def help(self, update:tg.Update, context:CallbackContext):
         help = f'Say /hello to start'
