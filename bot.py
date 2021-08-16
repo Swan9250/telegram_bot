@@ -12,8 +12,8 @@ from telegram.ext import CallbackQueryHandler
 class countGame():
     def __init__(self):
         self.bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
-        self.schet = "E 17:22 В"
-        self.pred = "E 17:22 В"
+        self.schet = "E 18:22 В"
+        self.pred = "E 18:22 В"
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
         self.bot = self.updater.bot
@@ -34,9 +34,9 @@ class countGame():
 #        print('run')
 #        self.queue.run_repeating(self.medicine, interval=10.0, first=0.0)
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 13, minute=30, second=00), context=update)
+                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 18, minute=30, second=00), context=update)
+                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
 #        print(self.queue.jobs())
         
 
@@ -66,16 +66,16 @@ class countGame():
         Otkat = tg.KeyboardButton('/Otkat')
 #        timer = tg.KeyboardButton('/Timer')
         if update.message.chat.title == 'Доминирование':
-            return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]])
+            return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]], one_time_keyboard = True)
         elif update.message.chat.id == 177870052:
-            return tg.ReplyKeyboardMarkup([[hello], [help], [start]])
+            return tg.ReplyKeyboardMarkup([[hello], [help], [start]], one_time_keyboard = True)
         else:
             print('Лошара')
 
 
     def hello(self, update:tg.Update, context:CallbackContext):
         hello = f'Hello {update.effective_user.first_name}'
-        self.bot.sendMessage(self.getChatId(update), hello, reply_markup=self.keyboardDom(update))
+        self.bot.sendMessage(self.getChatId(update), hello, allow_sending_without_reply=True, reply_markup=self.keyboardDom(update))
 
     def help(self, update:tg.Update, context:CallbackContext):
         help = f'Say /hello to start'
