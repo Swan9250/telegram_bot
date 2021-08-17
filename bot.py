@@ -12,8 +12,8 @@ from telegram.ext import CallbackQueryHandler
 class countGame():
     def __init__(self):
         self.bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
-        self.schet = "E 18:22 В"
-        self.pred = "E 18:22 В"
+        self.schet = "E 19:22 В"
+        self.pred = "E 19:22 В"
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
         self.bot = self.updater.bot
@@ -66,7 +66,7 @@ class countGame():
         Otkat = tg.KeyboardButton('/Otkat')
 #        timer = tg.KeyboardButton('/Timer')
         if update.message.chat.title == 'Доминирование':
-            return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]], one_time_keyboard = True)
+            return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]], one_time_keyboard = True, selective = True)
         elif update.message.chat.id == 177870052:
             return tg.ReplyKeyboardMarkup([[hello], [help], [start]], one_time_keyboard = True)
         else:
@@ -74,7 +74,7 @@ class countGame():
 
 
     def hello(self, update:tg.Update, context:CallbackContext):
-        hello = f'Hello {update.effective_user.first_name}'
+        hello = f'Hello @{update.effective_user.username}'
         self.bot.sendMessage(self.getChatId(update), hello, reply_markup=self.keyboardDom(update))
 
     def help(self, update:tg.Update, context:CallbackContext):
