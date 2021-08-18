@@ -25,15 +25,25 @@ class main:
         self.updater.start_polling()
         self.updater.idle()
 
-    def medicine(self, context: CallbackContext):
-        message = "Выпей таблетки"
-        context.bot.send_message(self.swans_chat_id, message)
 
-    def cronTasks(self, update, *args):
-        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
-        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
+    def keyboardBack(self):
+        back = tg.KeyboardButton("Назад")
+        return [back]
+
+
+    def keyboardPeriod(self):
+        year = tg.KeyboardButton(self.phrases[1])
+        month = tg.KeyboardButton(self.phrases[2])
+        week = tg.KeyboardButton(self.phrases[3])
+        day = tg.KeyboardButton(self.phrases[4])
+        return [year, month, week, day]
+
+
+    def keyboardNotify(self):
+        notify = tg.KeyboardButton('Задать уведомление')
+        return [notify]
+
+
 
     def getText(self, context):
         job = context.job
@@ -52,10 +62,11 @@ class main:
 
     def notifications(self, update, context: CallbackContext):
         if update.message.text == self.phrases[0]:
-            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = tg.ReplyKeyboardMarkup(self.keyboardNot(update), one_time_keyboard = True))
-        elif update.message.text == self.phrases[1]:
+            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()))
             context.user_data['Back'] = update.message.text
-            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = tg.ReplyKeyboardMarkup([["Назад"]], input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс', one_time_keyboard = True, resize_keyboard = True))
+        elif update.message.text in self.phrases:
+            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'))
+            context.user_data['Back'] = update.message.text
         else:
             pass
 
@@ -82,56 +93,47 @@ class main:
     def Back(self, update, context):
         if context.user_data != {}:
     #        print(context.user_data)
-            if context.user_data['Back'] == self.phrases[1]:
+            if context.user_data['Back'] == self.phrases[0]:
+                self.hello(update, context)
+            elif context.user_data['Back'] in self.phrases:
+                #self.bot
                 self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = tg.ReplyKeyboardMarkup(self.keyboardNot(update), one_time_keyboard = True))
             elif 'Дата' in context.user_data['Back']:
                 self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = tg.ReplyKeyboardMarkup([["Назад"]], input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс', one_time_keyboard = True, resize_keyboard = True))
-        
-
-    def commandsHandler(self):
-        self.dispatcher.add_handler(CommandHandler("hello", self.hello))
-        self.dispatcher.add_handler(CommandHandler("help", self.help))
-        self.dispatcher.add_handler(CommandHandler("start", self.start))
-        self.dispatcher.add_handler(CommandHandler("EgorWin", self.Ewin))
-        self.dispatcher.add_handler(CommandHandler("VovaWin", self.Vwin))
-        self.dispatcher.add_handler(CommandHandler("Otkat", self.Otkat))
-        self.dispatcher.add_handler(MessageHandler(Filters.text(self.phrases), self.notifications))
-        self.dispatcher.add_handler(MessageHandler(Filters.regex('^.*:.*:.* .*:.*:.*$'), self.makeFirst))
-        self.dispatcher.add_handler(MessageHandler(Filters.regex('^Уведомление:'), self.notify))
-        self.dispatcher.add_handler(MessageHandler(Filters.regex('^Назад$'), self.Back))
-#        self.dispatcher.add_handler(CallbackQueryHandler(self.cronTasks, pass_job_queue = True))
 
 
-#    def update(self)->list:
-#        return self.bot.getUpdates()
+#### Блок захардкоженных напоминаний
 
-    def getChatId(self, update:tg.Update):
-        return update.message.chat.id
 
-    def keyboardDom(self, update):
-        hello = tg.KeyboardButton('/hello')
-        help = tg.KeyboardButton('/help')
+    def medicine(self, context: CallbackContext):
+        """
+        Сообщение, используемое в захардкоженных заданиях
+        """
+        message = "Выпей таблетки"
+        context.bot.send_message(self.swans_chat_id, message)
+
+    def cronTasks(self, update, *args):
+        """
+        Ставим задания в очередь выполнения
+        """
+        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
+        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
+
+#### Конец блока захардкоженных напоминаний
+
+
+#### Игровой блок
+
+
+    def keyboardKicker(self):
         Vwin = tg.KeyboardButton('/VovaWin')
         Ewin = tg.KeyboardButton('/EgorWin')
-        start = tg.KeyboardButton('/start')
         Otkat = tg.KeyboardButton('/Otkat')
-        notify = tg.KeyboardButton('Задать уведомление')
-#        timer = tg.KeyboardButton('/Timer')
-        if update.message.chat.title == 'Доминирование':
-            return tg.ReplyKeyboardMarkup([[hello, help, Vwin], [Ewin, start, Otkat], [notify]], one_time_keyboard = True, selective = True)
-        elif update.message.chat.id == self.swans_chat_id:
-            return tg.ReplyKeyboardMarkup([[hello, help], [start, notify]], one_time_keyboard = True)
-        else:
-            print('Лошара')
+        return [Vwin, Ewin, Otkat]
 
 
-    def hello(self, update:tg.Update, context:CallbackContext):
-        hello = f'Hello @{update.effective_user.username}'
-        self.bot.sendMessage(self.getChatId(update), hello, reply_markup=self.keyboardDom(update))
-
-    def help(self, update:tg.Update, context:CallbackContext):
-        help = f'Say /hello to start'
-        self.bot.sendMessage(self.getChatId(update), help)
 
     def Vwin(self, update:tg.Update, context:CallbackContext):
         e = int(self.schet[2:self.schet.find(":")])
@@ -153,8 +155,73 @@ class main:
         self.schet = self.pred
         self.bot.sendMessage(self.getChatId(update), self.schet)
 
+#### Конец игрового блока
+
+#### Главные функции
+
+
+    def keyboard(*args, input_field_placeholder = None):
+        board = []
+        for i in args[1:]:
+            board.append(i)
+        return tg.ReplyKeyboardMarkup(board, one_time_keyboard = True, resize_keyboard = True, input_field_placeholder = input_field_placeholder)
+
+
+    def keyboardMain(self):
+        hello = tg.KeyboardButton('/hello')
+        help = tg.KeyboardButton('/help')
+        start = tg.KeyboardButton('/start')
+        return [hello, help, start]
+
+    
+    def commandsHandler(self):
+        """
+        Здесь представлены все обработчики команд, сообщений.
+        """
+        self.dispatcher.add_handler(CommandHandler("hello", self.hello))   #
+        self.dispatcher.add_handler(CommandHandler("help", self.help))     #
+        self.dispatcher.add_handler(CommandHandler("start", self.start))   #
+        self.dispatcher.add_handler(CommandHandler("EgorWin", self.Ewin))  # Переписать этот блок через MessageHandler
+        self.dispatcher.add_handler(CommandHandler("VovaWin", self.Vwin))  #
+        self.dispatcher.add_handler(CommandHandler("Otkat", self.Otkat))   #
+        self.dispatcher.add_handler(MessageHandler(Filters.text(self.phrases), self.notifications))
+        self.dispatcher.add_handler(MessageHandler(Filters.regex('^.*:.*:.* .*:.*:.*$'), self.makeFirst))
+        self.dispatcher.add_handler(MessageHandler(Filters.regex('^Уведомление:'), self.notify))
+        self.dispatcher.add_handler(MessageHandler(Filters.regex('^Назад$'), self.Back))                   # Я пока хз, как делать CallbackQueryHandler, наверное, для этого нужен CallbackQuery
+
+    
+    def getChatId(self, update:tg.Update):
+        """
+        Получение id чата.
+        """
+        return update.message.chat.id
+
+
+    def help(self, update:tg.Update, context:CallbackContext):
+        """
+        Помощь по командам. Надо доделать.
+        """
+        help = f'Для начала скажи /hello'
+        self.bot.sendMessage(self.getChatId(update), help)
+
+
+    def hello(self, update:tg.Update, context:CallbackContext):
+        """
+        Православное приветствие.
+        """
+        hello = f'Hello @{update.effective_user.username}'
+        if update.message.chat.id == self.swans_chat_id:
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = self.keyboard(self.keyboardMain(), self.keyboardNotify()))
+        elif update.message.chat.title == 'Доминирование':
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = self.keyboard(self.keyboardMain(), self.keyboardKicker(), self.keyboardNotify()))
+        else:
+            self.bot.sendMessage(self, getChatId(update), hello, reply_markup = self.keyboard(self.keyboardMain()))
+
 
     def start(self, update:tg.Update, context:CallbackContext):
+        """
+        Обрабатываем стандартный запуск бота.
+        """
         start = f'Ты обратился к боту, но сделал это без уважения, введи /hello'
         photo = 'https://i.ytimg.com/vi/q8ADpnunCGo/hqdefault.jpg'
         self.bot.sendMessage(self.getChatId(update), start)
