@@ -1,19 +1,20 @@
 import datetime
 import json
 import telegram as tg
-from telegram.ext import Updater, CommandHandler, CallbackContext, JobQueue, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters#JobQueue
 from telegram.ext import CallbackQueryHandler
 
-#bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
 
-#chat_id_with_Swan = '177870052'
+phrases = ['Задать уведомление',
+          'Ежегодно', 'Ежемесячно', 'Еженедельно', 'Ежедневно']
 
-
-class countGame():
-    def __init__(self):
+class main:
+    def __init__(self, buttons):
         self.bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
+        self.swans_chat_id = 177870052
         self.schet = "E 19:22 В"
         self.pred = "E 19:22 В"
+        self.phrases = phrases
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
         self.bot = self.updater.bot
@@ -25,19 +26,66 @@ class countGame():
         self.updater.idle()
 
     def medicine(self, context: CallbackContext):
-#        print('popal')
         message = "Выпей таблетки"
-        context.bot.send_message(177870052, message)
-#        print('Popal')
+        context.bot.send_message(self.swans_chat_id, message)
 
     def cronTasks(self, update, *args):
-#        print('run')
-#        self.queue.run_repeating(self.medicine, interval=10.0, first=0.0)
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 10, minute=30, second=00), context=update)
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 15, minute=30, second=00), context=update)
-#        print(self.queue.jobs())
+
+    def getText(self, context):
+        job = context.job
+        context.bot.send_message(int(job.context['chat_id']), job.context['text'])
+
+    def makeFirst(self, update, context):
+        if "Дата:" in update.message.text:
+            context.user_data['Back'] = update.message.text
+            text = update.message.text
+            text = text.split(" ")
+            dat = text[1].split(":")
+            tim = text[2].split(":")
+            first = datetime.datetime(year = int(dat[0]), month = int(dat[1]), day = int(dat[2]), hour = int(tim[0]) - 3, minute = int(tim[1]), second = int(tim[2][:2]))
+            self.bot.sendMessage(self.getChatId(update), 'Напиши напоминалку', reply_markup = tg.ReplyKeyboardMarkup([["Назад"]], input_field_placeholder = 'Уведомление:', one_time_keyboard = True, resize_keyboard = True))
+            context.user_data['data'] = first
+
+    def notifications(self, update, context: CallbackContext):
+        if update.message.text == self.phrases[0]:
+            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = tg.ReplyKeyboardMarkup(self.keyboardNot(update), one_time_keyboard = True))
+        elif update.message.text == self.phrases[1]:
+            context.user_data['Back'] = update.message.text
+            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = tg.ReplyKeyboardMarkup([["Назад"]], input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс', one_time_keyboard = True, resize_keyboard = True))
+        else:
+            pass
+
+    def notify(self, update, context):
+        if 'Уведомление:' in update.message.text:
+            first = context.user_data['data']
+            text = update.message.text
+            context.user_data['text'] = text
+            context.user_data['chat_id'] = self.getChatId(update)
+            self.bot.sendMessage(self.getChatId(update), "Готово", reply_markup = self.keyboardDom(update))
+            self.queue.run_repeating(self.getText, datetime.timedelta(days = 365), first = first, name = 'notify', context=context.user_data)
+        else:
+            pass
+        
+    
+    def keyboardNot(self, update):
+        year = tg.KeyboardButton(self.phrases[1])
+        month = tg.KeyboardButton(self.phrases[2])
+        week = tg.KeyboardButton(self.phrases[3])
+        day = tg.KeyboardButton(self.phrases[4])
+        return [[year, month], [week, day]]
+        
+
+    def Back(self, update, context):
+        if context.user_data != {}:
+    #        print(context.user_data)
+            if context.user_data['Back'] == self.phrases[1]:
+                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = tg.ReplyKeyboardMarkup(self.keyboardNot(update), one_time_keyboard = True))
+            elif 'Дата' in context.user_data['Back']:
+                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = tg.ReplyKeyboardMarkup([["Назад"]], input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс', one_time_keyboard = True, resize_keyboard = True))
         
 
     def commandsHandler(self):
@@ -47,12 +95,15 @@ class countGame():
         self.dispatcher.add_handler(CommandHandler("EgorWin", self.Ewin))
         self.dispatcher.add_handler(CommandHandler("VovaWin", self.Vwin))
         self.dispatcher.add_handler(CommandHandler("Otkat", self.Otkat))
+        self.dispatcher.add_handler(MessageHandler(Filters.text(self.phrases), self.notifications))
+        self.dispatcher.add_handler(MessageHandler(Filters.regex('^.*:.*:.* .*:.*:.*$'), self.makeFirst))
+        self.dispatcher.add_handler(MessageHandler(Filters.regex('^Уведомление:'), self.notify))
+        self.dispatcher.add_handler(MessageHandler(Filters.regex('^Назад$'), self.Back))
 #        self.dispatcher.add_handler(CallbackQueryHandler(self.cronTasks, pass_job_queue = True))
 
- #       self.dispatcher.add_handler(CommandHandler("Timer", self.cronTasks))
 
-    def update(self)->list:
-        return self.bot.getUpdates()
+#    def update(self)->list:
+#        return self.bot.getUpdates()
 
     def getChatId(self, update:tg.Update):
         return update.message.chat.id
@@ -64,11 +115,12 @@ class countGame():
         Ewin = tg.KeyboardButton('/EgorWin')
         start = tg.KeyboardButton('/start')
         Otkat = tg.KeyboardButton('/Otkat')
+        notify = tg.KeyboardButton('Задать уведомление')
 #        timer = tg.KeyboardButton('/Timer')
         if update.message.chat.title == 'Доминирование':
-            return tg.ReplyKeyboardMarkup([[hello], [help], [Vwin], [Ewin], [start], [Otkat]], one_time_keyboard = True, selective = True)
-        elif update.message.chat.id == 177870052:
-            return tg.ReplyKeyboardMarkup([[hello], [help], [start]], one_time_keyboard = True)
+            return tg.ReplyKeyboardMarkup([[hello, help, Vwin], [Ewin, start, Otkat], [notify]], one_time_keyboard = True, selective = True)
+        elif update.message.chat.id == self.swans_chat_id:
+            return tg.ReplyKeyboardMarkup([[hello, help], [start, notify]], one_time_keyboard = True)
         else:
             print('Лошара')
 
@@ -109,10 +161,6 @@ class countGame():
         self.bot.sendPhoto(self.getChatId(update), photo)
 
 
-    def get_chat_id(self):
-        self.chat_id = self.updater.message_id
-
-
 
 if __name__ == '__main__':
-    countGame()
+    main(phrases)
