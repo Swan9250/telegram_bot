@@ -55,7 +55,10 @@ class main:
             text = text.split(" ")
             dat = text[1].split(":")
             tim = text[2].split(":")
-            first = datetime.datetime(year = int(dat[0]), month = int(dat[1]), day = int(dat[2]), hour = int(tim[0]) - 3, minute = int(tim[1]), second = int(tim[2][:2])) # -3 потому что бот сам прибавляет таймзону
+            hour = int(tim[0])
+            if context.user_data['period'] != self.phrases[2]:
+                hour = int(tim[0]) - 3
+            first = datetime.datetime(year = int(dat[0]), month = int(dat[1]), day = int(dat[2]), hour = hour, minute = int(tim[1]), second = int(tim[2][:2])) # -3 потому что бот сам прибавляет таймзону
             self.bot.sendMessage(self.getChatId(update), "Напиши напоминалку", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = "Уведомление:"))
             context.user_data['data'] = first
             context.user_data['Back'] = update.message.text
@@ -66,6 +69,7 @@ class main:
             context.user_data['Back'] = update.message.text
         else:
             self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'))
+            context.user_data['period'] = update.message.text
             context.user_data['Back'] = update.message.text
 
     def notify(self, update, context):
@@ -74,8 +78,18 @@ class main:
             text = update.message.text
             context.user_data['text'] = text
             context.user_data['chat_id'] = self.getChatId(update)
+            context.user_data['Back'] = update.message.text
             self.bot.sendMessage(self.getChatId(update), "Готово", reply_markup = context.user_data["keyboard"])
-            self.queue.run_repeating(self.getText, datetime.timedelta(days = 365), first = first, name = 'notify', context=context.user_data)
+            if context.user_data['period'] == self.phrases[1]:
+                self.queue.run_repeating(self.getText, datetime.timedelta(days = 365), first = first, name = 'notifyYear', context = context.user_data)
+            elif context.user_data['period'] == self.phrases[2]:
+                self.queue.run_monthly(self.getText, first.time(), first.day, context = context.user_data, name = 'notifyMonth', day_is_strict = False)
+            elif context.user_data['period'] == self.phrases[3]:
+                self.queue.run_daily(self.getText, first.time(), days = str(first.weekday()), context = context.user_data, name = 'notifyWeek')
+            elif context.user_data['period'] == self.phrases[4]:
+                self.queue.run_daily(self.getText, first.time(), context = context.user_data, name = 'notifyDaily')
+            else:
+                pass
         else:
             pass
         
@@ -92,11 +106,15 @@ class main:
         if context.user_data != {}:
             if context.user_data['Back'] == self.phrases[0]:
                 self.hello(update, context)
+                context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardNotify())
             elif context.user_data['Back'] in self.phrases:
-                #self.bot
-                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = tg.ReplyKeyboardMarkup(self.keyboardNot(update), one_time_keyboard = True))
+                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()))
+                context.user_data['Back'] = self.phrases[0]
             elif 'Дата' in context.user_data['Back']:
-                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = tg.ReplyKeyboardMarkup([["Назад"]], input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс', one_time_keyboard = True, resize_keyboard = True))
+                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'))
+                context.user_data['Back'] = "Ежегодно"
+            else:
+                self.hello(update, context)
 
 
 #### Блок захардкоженных напоминаний
