@@ -9,8 +9,8 @@ phrases = ['Задать уведомление',
           'Ежегодно', 'Ежемесячно', 'Еженедельно', 'Ежедневно']
 
 class main:
-    def __init__(self, buttons):
-        self.bot_token = "1252528974:AAHXokVMmpKs80OHuTZdbArBFeBCs2PZKtU"
+    def __init__(self, buttons, token):
+        self.bot_token = token
         self.swans_chat_id = 177870052
         self.schet = "E 19:22 В"
         self.pred = "E 19:22 В"
@@ -231,6 +231,9 @@ class main:
         elif update.message.chat.title == 'Доминирование':
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardKicker(), self.keyboardNotify())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"])
+        elif update.message.chat.title == 'Че кого':
+            context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardNotify())
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"])
         else:
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain())
             self.bot.sendMessage(self, getChatId(update), hello, reply_markup = contex.user_data["keyboard"])
@@ -248,4 +251,6 @@ class main:
 
 
 if __name__ == '__main__':
-    main(phrases)
+    with open('token', 'r') as t:
+        token = str(t.read())
+    main(phrases, token[:-1])
