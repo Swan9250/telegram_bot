@@ -12,8 +12,8 @@ class main:
     def __init__(self, buttons, token):
         self.bot_token = token
         self.swans_chat_id = 177870052
-        self.schet = "E 19:22 В"
-        self.pred = "E 19:22 В"
+        self.schet = "E 21:23 В"
+        self.pred = "E 21:23 В"
         self.phrases = phrases
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
@@ -120,6 +120,10 @@ class main:
 #### Блок захардкоженных напоминаний
 
 
+    def poll(self, context: CallbackContext):
+        context.bot.send_poll(self.swans_chat_id, question="Обед", options=['13:00', '13:30', '14:00', '14:30', '15:00', 'позже 15'], is_anonymous=False, allows_multiple_answers=True)
+
+
     def medicine(self, context: CallbackContext):
         """
         Сообщение, используемое в захардкоженных заданиях
@@ -135,6 +139,7 @@ class main:
                                     time=datetime.time(hour = 10, minute=30, second=00), context=update)
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 15, minute=30, second=00), context=update)
+        self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
 
 #### Конец блока захардкоженных напоминаний
 
@@ -234,6 +239,9 @@ class main:
         elif update.message.chat.title == 'Че кого':
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardNotify())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"])
+        elif update.message.chat.title == 'Идеология мертва':
+            self.bot.sendMessage(self.getChatId(update), hello)
+            print(self.getChatId(update))
         else:
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain())
             self.bot.sendMessage(self, getChatId(update), hello, reply_markup = contex.user_data["keyboard"])
