@@ -3,6 +3,11 @@ import json
 import telegram as tg
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters#JobQueue
 from telegram.ext import CallbackQueryHandler
+import os, sys
+p = os.path.abspath('../beget/')
+sys.path.insert(1, p)
+from api.base import auth
+from api.internal import Line
 
 
 phrases = ['Задать уведомление',
@@ -12,8 +17,9 @@ class main:
     def __init__(self, buttons, token):
         self.bot_token = token
         self.swans_chat_id = 177870052
-        self.schet = "E 21:23 В"
-        self.pred = "E 21:23 В"
+        self.neustroev_chat_id = 749074706
+        self.schet = "E 23:23 В"
+        self.pred = "E 23:23 В"
         self.phrases = phrases
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
@@ -24,6 +30,33 @@ class main:
         self.commandsHandler()
         self.updater.start_polling()
         self.updater.idle()
+
+    
+    def neustroev(self, context: CallbackContext):
+        enter = auth.Auth()
+        line = Line('first')
+        count = 0
+#        print(line.get())
+        for i in line.get():
+            dattim = i['in_queue_from']
+            tim = dattim[dattim.find('T') + 1:dattim.find('+')]
+            cut = tim.split(':')
+            hour = int(cut[0])
+            minute = int(cut[1])
+        #print(i['subject'], tim, datetime.datetime.now().hour)
+            if datetime.datetime.now().hour > hour and datetime.datetime.now().minute - 20 > minute:
+                count += 1
+        #self.bot.sendMessage(self.neystroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
+        if count > 0:
+            self.bot.sendMessage(self.neustroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
+
+
+#    def neustroev(self, context: CallbackContext):
+#        self.queue.run_repeating(self.getLine, 60, first = datetime.time(hour = 8, minute=0, second=00), last = datetime.time(hour=17, minute=0, second=00), context=context)
+#        self.queue.run_repeating(self.getLine, 60, context=context)
+
+
+
 
 
     def keyboardBack(self):
@@ -59,16 +92,16 @@ class main:
             if context.user_data['period'] != self.phrases[2]:
                 hour = int(tim[0]) - 3
             first = datetime.datetime(year = int(dat[0]), month = int(dat[1]), day = int(dat[2]), hour = hour, minute = int(tim[1]), second = int(tim[2][:2])) # -3 потому что бот сам прибавляет таймзону
-            self.bot.sendMessage(self.getChatId(update), "Напиши напоминалку", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = "Уведомление:"))
+            self.bot.sendMessage(self.getChatId(update), "Напиши напоминалку", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = "Уведомление:"), reply_to_message_id = update.message.message_id)
             context.user_data['data'] = first
             context.user_data['Back'] = update.message.text
 
     def notifications(self, update, context: CallbackContext):
         if update.message.text == self.phrases[0]:
-            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()))
+            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()), reply_to_message_id = update.message.message_id)
             context.user_data['Back'] = update.message.text
         else:
-            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'))
+            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
             context.user_data['period'] = update.message.text
             context.user_data['Back'] = update.message.text
 
@@ -79,7 +112,7 @@ class main:
             context.user_data['text'] = text
             context.user_data['chat_id'] = self.getChatId(update)
             context.user_data['Back'] = update.message.text
-            self.bot.sendMessage(self.getChatId(update), "Готово", reply_markup = context.user_data["keyboard"])
+            self.bot.sendMessage(self.getChatId(update), "Готово", reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
             if context.user_data['period'] == self.phrases[1]:
                 self.queue.run_repeating(self.getText, datetime.timedelta(days = 365), first = first, name = 'notifyYear', context = context.user_data)
             elif context.user_data['period'] == self.phrases[2]:
@@ -108,10 +141,10 @@ class main:
                 self.hello(update, context)
                 context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardNotify())
             elif context.user_data['Back'] in self.phrases:
-                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()))
+                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()), reply_to_message_id = update.message.message_id)
                 context.user_data['Back'] = self.phrases[0]
             elif 'Дата' in context.user_data['Back']:
-                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'))
+                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
                 context.user_data['Back'] = "Ежегодно"
             else:
                 self.hello(update, context)
@@ -140,6 +173,8 @@ class main:
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 15, minute=30, second=00), context=update)
         self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
+        if datetime.datetime.now().hour >= 11 or datetime.datetime.now().hour <= 20:
+            self.queue.run_repeating(self.neustroev, 60, context=update)
 
 #### Конец блока захардкоженных напоминаний
 
@@ -184,7 +219,7 @@ class main:
         board = []
         for i in args[1:]:
             board.append(i)
-        return tg.ReplyKeyboardMarkup(board, one_time_keyboard = True, resize_keyboard = True, input_field_placeholder = input_field_placeholder)
+        return tg.ReplyKeyboardMarkup(board, one_time_keyboard = True, resize_keyboard = True, input_field_placeholder = input_field_placeholder, selective = True)
 
 
     def keyboardMain(self):
@@ -232,19 +267,20 @@ class main:
         hello = f'Hello @{update.effective_user.username}'
         if update.message.chat.id == self.swans_chat_id:
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardNotify())
-            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"])
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Доминирование':
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardKicker(), self.keyboardNotify())
-            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"])
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Че кого':
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain(), self.keyboardNotify())
-            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"])
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Идеология мертва':
-            self.bot.sendMessage(self.getChatId(update), hello)
-            print(self.getChatId(update))
+            self.bot.sendMessage(self.getChatId(update), hello, reply_to_message_id = update.message.message_id)
+#            print(self.getChatId(update))
         else:
+#            print(update.message)
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain())
-            self.bot.sendMessage(self, getChatId(update), hello, reply_markup = contex.user_data["keyboard"])
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = contex.user_data["keyboard"], reply_to_message_id = update.message.message_id)
 
 
     def start(self, update:tg.Update, context:CallbackContext):
