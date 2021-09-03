@@ -18,8 +18,8 @@ class main:
         self.bot_token = token
         self.swans_chat_id = 177870052
         self.neustroev_chat_id = 749074706
-        self.schet = "E 23:23 В"
-        self.pred = "E 23:23 В"
+        self.schet = "E 25:25 В"
+        self.pred = "E 25:25 В"
         self.phrases = phrases
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
@@ -32,39 +32,60 @@ class main:
         self.updater.idle()
 
     
-    def neustroev(self, context: CallbackContext):
+    def neus(self, context: CallbackContext):
         enter = auth.Auth()
         line = Line('first')
         count = 0
-#        print(line.get())
+        workers_on_line = []
+        tickets_over_20 = []
         for i in line.get():
             dattim = i['in_queue_from']
+            if i['assignee_name'] != '':
+                workers_on_line.append(i['assignee_name'])
             tim = dattim[dattim.find('T') + 1:dattim.find('+')]
             cut = tim.split(':')
             hour = int(cut[0])
             minute = int(cut[1])
-        #print(i['subject'], tim, datetime.datetime.now().hour)
-            if datetime.datetime.now().hour > hour and datetime.datetime.now().minute - 20 > minute:
+            if (datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute > 20:
+                tickets_over_20.append([i['subject'], str((datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute) + ' мин', i['assignee_name']])
                 count += 1
-        #self.bot.sendMessage(self.neystroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
         if count > 0:
-            self.bot.sendMessage(self.neustroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
+            pizdit = f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут"
+            beauty_tickets = '\n'.join(str(i) for i in tickets_over_20)
+            tickets_count = f"Тикеты больше 20 мин:\n {beauty_tickets}"
+            people_on_line = ''
+#            self.bot.sendMessage(self.neustroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
+#            self.bot.sendMessage(self.neustroev_chat_id, f"тикеты больше 20 мин: {tickets_over_20}")
+            if len(workers_on_line) != 0: 
+                beauty_people = '\n'.join(workers_on_line)
+                people_on_line = f"Сотрудники на линии:\n{beauty_people}"
+#                self.bot.sendMessage(self.neustroev_chat_id, f"Сотрудники на линии: {workers_on_line}")
+            else:
+                people_on_line = "ALARM!!! Никого нет на линии!"
+#                self.bot.sendMessage(self.neustroev_chat_id, "ALARM!!! Никого нет на линии!")
+            self.bot.sendMessage(self.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+#            self.bot.sendMessage(self.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 
 
-#    def neustroev(self, context: CallbackContext):
-#        self.queue.run_repeating(self.getLine, 60, first = datetime.time(hour = 8, minute=0, second=00), last = datetime.time(hour=17, minute=0, second=00), context=context)
-#        self.queue.run_repeating(self.getLine, 60, context=context)
+    def neustroev(self, context: CallbackContext):
+        self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context)
 
 
-
+#### Блок нотификаций
 
 
     def keyboardBack(self):
+        """
+        Делаем кнопку "Назад на клавиатуре"
+        """
         back = tg.KeyboardButton("Назад")
         return [back]
 
 
     def keyboardPeriod(self):
+        """
+        Делаем кнопки периодов нотификаций
+        """
         year = tg.KeyboardButton(self.phrases[1])
         month = tg.KeyboardButton(self.phrases[2])
         week = tg.KeyboardButton(self.phrases[3])
@@ -73,6 +94,9 @@ class main:
 
 
     def keyboardNotify(self):
+        """
+        Делаем кнопку "Задать уведомление"
+        """
         notify = tg.KeyboardButton('Задать уведомление')
         return [notify]
 
@@ -149,6 +173,8 @@ class main:
             else:
                 self.hello(update, context)
 
+#### Конец блока нотификаций
+
 
 #### Блок захардкоженных напоминаний
 
@@ -168,13 +194,15 @@ class main:
         """
         Ставим задания в очередь выполнения
         """
-        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
+#        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+#                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 15, minute=30, second=00), context=update)
         self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
-        if datetime.datetime.now().hour >= 11 or datetime.datetime.now().hour <= 20:
-            self.queue.run_repeating(self.neustroev, 60, context=update)
+        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=6, second=00), context=update)
+#        if datetime.datetime.now().hour >= 11 or datetime.datetime.now().hour < 20:
+#            self.queue.run_repeating(self.neustroev, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=update)
+            
 
 #### Конец блока захардкоженных напоминаний
 
@@ -280,7 +308,7 @@ class main:
         else:
 #            print(update.message)
             context.user_data["keyboard"] = self.keyboard(self.keyboardMain())
-            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = contex.user_data["keyboard"], reply_to_message_id = update.message.message_id)
+            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
 
 
     def start(self, update:tg.Update, context:CallbackContext):
