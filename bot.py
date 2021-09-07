@@ -18,8 +18,8 @@ class main:
         self.bot_token = token
         self.swans_chat_id = 177870052
         self.neustroev_chat_id = 749074706
-        self.schet = "E 25:25 В"
-        self.pred = "E 25:25 В"
+        self.schet = "E 26:26 В"
+        self.pred = "E 26:26 В"
         self.phrases = phrases
         self.updater = Updater(self.bot_token, use_context=True)
         self.dispatcher = self.updater.dispatcher
@@ -199,7 +199,7 @@ class main:
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 15, minute=30, second=00), context=update)
         self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
-        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=6, second=00), context=update)
+        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 8, minute=0, second=00), context=update)
 #        if datetime.datetime.now().hour >= 11 or datetime.datetime.now().hour < 20:
 #            self.queue.run_repeating(self.neustroev, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=update)
             
