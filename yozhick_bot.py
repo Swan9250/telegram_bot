@@ -71,7 +71,7 @@ class Main:
     def work(self, update, context):
         but = buttons['Критикал']
         if update.message.text == but[0] or update.message.text == but[2]:
-            self.neustroev(context)
+            self.neustroev(update, context)
         else:
             self.relax(context)
 
@@ -118,16 +118,23 @@ class Main:
             else:
                 people_on_line = "ALARM!!! Никого нет на линии!"
 #                self.bot.sendMessage(self.neustroev_chat_id, "ALARM!!! Никого нет на линии!")
-#            self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-            self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+            self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+#            self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 
 
-    def neustroev(self, context: CallbackContext):
-        print(self.queue.get_jobs_by_name('Work'))
-        context.user_data['enter'] = auth.Auth()  # Может быть None, засунуть в try/except
-        self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
-        self.queue.get_jobs_by_name('Work')[0].enabled = True # Джоба тоже может быть None
-        print(self.queue.get_jobs_by_name('Work')[0].enabled)
+    def neustroev(self,update, context: CallbackContext):
+        enter = auth.Auth()
+        if enter is not None:
+            context.user_data['enter'] = enter
+            self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+            self.queue.get_jobs_by_name('Work')[0].enabled = True
+        else:
+            self.bot.sendMessage(self.getChatId(update), 'Что-то пошло не так, нажми ещё раз')
+#        print(self.queue.get_jobs_by_name('Work'))
+#        context.user_data['enter'] = auth.Auth()  # Может быть None, засунуть в try/except
+#        self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+#        self.queue.get_jobs_by_name('Work')[0].enabled = True # Джоба тоже может быть None
+#        print(self.queue.get_jobs_by_name('Work')[0].enabled)
 
 
 #### Блок нотификаций
@@ -262,7 +269,7 @@ class Main:
         self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
                                     time=datetime.time(hour = 15, minute=30, second=00), context=update)
         self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
-        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 8, minute=0, second=00), context=update)
+#        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 8, minute=0, second=00), context=update)
             
 
 #### Конец блока захардкоженных напоминаний
