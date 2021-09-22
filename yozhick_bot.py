@@ -128,6 +128,7 @@ class Main:
             context.user_data['enter'] = enter
             self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
             self.queue.get_jobs_by_name('Work')[0].enabled = True
+            self.bot.sendMessage(self.getChatId(update), 'Принято')
         else:
             self.bot.sendMessage(self.getChatId(update), 'Что-то пошло не так, нажми ещё раз')
 #        print(self.queue.get_jobs_by_name('Work'))
