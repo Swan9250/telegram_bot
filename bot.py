@@ -88,7 +88,7 @@ class Main:
 
     
     def neus(self, context: CallbackContext):
-        print('popal', self.queue.get_jobs_by_name('Work')[0].enabled)
+#        print('popal', self.queue.get_jobs_by_name('Work')[0].enabled)
 #        enter = auth.Auth()
         line = Line('first')
         count = 0
