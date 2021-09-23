@@ -33,6 +33,7 @@ def relax(context):
 
 def neus(context):
     queue = context.user_data['queue']
+    bot = context.user_data['bot']
     print('popal', queue.get_jobs_by_name('Work')[0].enabled)
     line = Line('first')
     count = 0
@@ -60,8 +61,7 @@ def neus(context):
         else:
             people_on_line = "ALARM!!! Никого нет на линии!"
 #        self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-#        self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-        return pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
+        bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 
 
 def run(context):
@@ -70,7 +70,6 @@ def run(context):
         auth.Auth()
         response = queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
         queue.get_jobs_by_name('Work')[0].enabled = True
-        print(enter, response)
-        return "Уведомления включены\n", response
+        return "Уведомления включены\n"
     except:
         return "Что-то пошло не так, обратитесь к разработчику"

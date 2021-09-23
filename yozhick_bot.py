@@ -53,6 +53,7 @@ class Main:
 
     def work(self, update, context):
         context.user_data['queue'] = self.queue
+        context.user_data['bot'] = self.bot
         response = wrk.work(update, context)
         self.bot.sendMessage(Main.swans_chat_id, response)
 
