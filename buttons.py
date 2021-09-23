@@ -9,7 +9,7 @@ buttons = {"Уведомления" :
           "Главные" :
               ['/hello', '/help', '/start', '/stop'],
           "Критикал" :
-              ['Начать работать', 'Уйти на обед', 'Прийти с обеда', 'Закончить работать']
+              ['Получать уведомления', 'Не получать уведомления']
           }
 
 
@@ -27,10 +27,8 @@ def keyboardWork():
     """
     but = buttons['Критикал']
     start_work = tg.KeyboardButton(but[0])
-    go_to_lunch = tg.KeyboardButton(but[1])
-    return_from_lunch = tg.KeyboardButton(but[2])
-    end_work = tg.KeyboardButton(but[3])
-    return [start_work, go_to_lunch, return_from_lunch, end_work]
+    end_work = tg.KeyboardButton(but[1])
+    return [start_work, end_work]
 
 
 def keyboardBack():

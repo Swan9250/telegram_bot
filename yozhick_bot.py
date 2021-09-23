@@ -9,7 +9,7 @@ p = os.path.abspath('../beget/')
 sys.path.insert(1, p)
 from api.base import auth
 from api.internal import Line
-import kicker, buttons as bt
+import kicker, buttons as bt, work as wrk
 
 __author__ = 'Vladimir Stanotin'
 __version__ = 0.35
@@ -18,18 +18,6 @@ __version__ = 0.35
 phrases = ['Задать уведомление',
           'Ежегодно', 'Ежемесячно', 'Еженедельно', 'Ежедневно']
 
-buttons = {"Уведомления" :
-              ['Задать уведомление',
-              'Ежегодно', 'Ежемесячно', 'Еженедельно', 'Ежедневно', 'Одноразово'],
-          "Кикер" :
-              ['Вова выиграл', 'Егор выиграл', 'Откат'],
-          "Главные" :
-              ['/hello', '/help', '/start', '/stop'],
-          "Критикал" :
-              ['Начать работать', 'Уйти на обед', 'Прийти с обеда', 'Закончить работать']
-          }
-
-print(buttons)
 
 class Main:
     """
@@ -54,27 +42,19 @@ class Main:
         self.updater.idle()
 
 
-    def keyboardWork(self):
-        """
-        Делаем кнопки периодов нотификаций
-        """
-        but = buttons['Критикал']
-        start_work = tg.KeyboardButton(but[0])
-        go_to_lunch = tg.KeyboardButton(but[1])
-        return_from_lunch = tg.KeyboardButton(but[2])
-        end_work = tg.KeyboardButton(but[3])
-        print([[start_work, go_to_lunch], [return_from_lunch, end_work]])
-        return [start_work, go_to_lunch, return_from_lunch, end_work]
-
+#    def work(self, update, context):
+#        but = bt.buttons['Критикал']
+#        if update.message.text == but[0] or update.message.text == but[2]:
+#            self.neustroev(update, context)
+#        else:
+#            self.relax(context)
+#            self.bot.sendMessage(self.getChatId(update), 'Принято')
 
 
     def work(self, update, context):
-        but = buttons['Критикал']
-        if update.message.text == but[0] or update.message.text == but[2]:
-            self.neustroev(update, context)
-        else:
-            self.relax(context)
-            self.bot.sendMessage(getChatId(update), 'Принято')
+        context.user_data['queue'] = self.queue
+        response = wrk.work(update, context)
+        self.bot.sendMessage(Main.swans_chat_id, response)
 
 
     def relax(self, context):
@@ -142,35 +122,6 @@ class Main:
 #### Блок нотификаций
 
 
-    def keyboardBack(self):
-        """
-        Делаем кнопку "Назад" на клавиатуре
-        """
-        back = tg.KeyboardButton("Назад")
-        return [back]
-
-
-    def keyboardPeriod(self):
-        """
-        Делаем кнопки периодов нотификаций
-        """
-        but = buttons['Уведомления']
-        year = tg.KeyboardButton(but[1])
-        month = tg.KeyboardButton(but[2])
-        week = tg.KeyboardButton(but[3])
-        day = tg.KeyboardButton(but[4])
-        return [year, month, week, day]
-
-
-    def keyboardNotify(self):
-        """
-        Делаем кнопку "Задать уведомление"
-        """
-        notify = tg.KeyboardButton('Задать уведомление')
-        return [notify]
-
-
-
     def getText(self, context):
         job = context.job
         context.bot.send_message(int(job.context['chat_id']), job.context['text'])
@@ -185,16 +136,16 @@ class Main:
             if context.user_data['period'] != Main.phrases[2]:
                 hour = int(tim[0]) - 3
             first = datetime.datetime(year = int(dat[0]), month = int(dat[1]), day = int(dat[2]), hour = hour, minute = int(tim[1]), second = int(tim[2][:2])) # -3 потому что бот сам прибавляет таймзону
-            self.bot.sendMessage(self.getChatId(update), "Напиши напоминалку", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = "Уведомление:"), reply_to_message_id = update.message.message_id)
+            self.bot.sendMessage(self.getChatId(update), "Напиши напоминалку", reply_markup = self.keyboard(bt.keyboardBack(), input_field_placeholder = "Уведомление:"), reply_to_message_id = update.message.message_id)
             context.user_data['data'] = first
             context.user_data['Back'] = update.message.text
 
     def notifications(self, update, context: CallbackContext):
         if update.message.text == Main.phrases[0]:
-            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()), reply_to_message_id = update.message.message_id)
+            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(bt.keyboardPeriod(), bt.keyboardBack()), reply_to_message_id = update.message.message_id)
             context.user_data['Back'] = update.message.text
         else:
-            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
+            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(bt.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
             context.user_data['period'] = update.message.text
             context.user_data['Back'] = update.message.text
 
@@ -225,10 +176,10 @@ class Main:
             if context.user_data['Back'] == Main.phrases[0]:
                 self.hello(update, context)
             elif context.user_data['Back'] in Main.phrases:
-                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(self.keyboardPeriod(), self.keyboardBack()), reply_to_message_id = update.message.message_id)
+                self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(bt.keyboardPeriod(), bt.keyboardBack()), reply_to_message_id = update.message.message_id)
                 context.user_data['Back'] = Main.phrases[0]
             elif 'Дата' in context.user_data['Back']:
-                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(self.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
+                self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(bt.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
                 context.user_data['Back'] = "Ежегодно"
             else:
                 self.hello(update, context)
@@ -297,13 +248,6 @@ class Main:
         return tg.ReplyKeyboardMarkup(board, one_time_keyboard = True, resize_keyboard = True, input_field_placeholder = input_field_placeholder, selective = True)
 
 
-    def keyboardMain(self):
-        hello = tg.KeyboardButton('/hello')
-        help = tg.KeyboardButton('/help')
-        start = tg.KeyboardButton('/start')
-        return [hello, help, start]
-
-    
     def commandsHandler(self):
         """
         Здесь представлены все обработчики команд, сообщений.
@@ -314,7 +258,7 @@ class Main:
         self.dispatcher.add_handler(CommandHandler("stop", self.stop))
         self.dispatcher.add_handler(MessageHandler(Filters.regex('^/.*'), self.default))
         self.dispatcher.add_handler(MessageHandler(Filters.text(bt.buttons['Кикер']), self.kicker))
-        self.dispatcher.add_handler(MessageHandler(Filters.text(buttons['Критикал']), self.work))
+        self.dispatcher.add_handler(MessageHandler(Filters.text(bt.buttons['Критикал']), self.work))
         self.dispatcher.add_handler(MessageHandler(Filters.text(Main.phrases), self.notifications))
         self.dispatcher.add_handler(MessageHandler(Filters.regex('^.*:.*:.* .*:.*:.*$'), self.makeFirst))
         self.dispatcher.add_handler(MessageHandler(Filters.regex('^Уведомление:'), self.notify))

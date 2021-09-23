@@ -74,7 +74,7 @@ class Main:
             self.neustroev(update, context)
         else:
             self.relax(context)
-            self.bot.sendMessage(getChatId(update), 'Принято')
+            self.bot.sendMessage(self.getChatId(update), 'Принято')
 
 
     def relax(self, context):
