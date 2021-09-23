@@ -61,7 +61,7 @@ def neus(context):
             people_on_line = "ALARM!!! Никого нет на линии!"
 #        self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 #        self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-        context.user_data['response'] = pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
+        return context.user_data['response'] = pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
 
 
 def run(context):
