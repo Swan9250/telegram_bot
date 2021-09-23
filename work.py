@@ -61,14 +61,14 @@ def neus(context):
             people_on_line = "ALARM!!! Никого нет на линии!"
 #        self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 #        self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-        return pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
+        context.user_data['response'] = pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
 
 
 def run(context):
     queue = context.user_data['queue']
 #    try:
     enter = auth.Auth()
-    response = queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+    response = queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work').context.user_data['response']
     print(dir(response))
     queue.get_jobs_by_name('Work')[0].enabled = True
     print(enter, response)
