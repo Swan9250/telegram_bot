@@ -69,6 +69,7 @@ def run(context):
 #    try:
     enter = auth.Auth()
     response = queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+    print(dir(response))
     queue.get_jobs_by_name('Work')[0].enabled = True
     print(enter, response)
     return "Уведомления включены\n" + response
