@@ -12,14 +12,14 @@ from api.internal import Line
 
 
 def work(update, context): # Не забыть передать в context self.queue
-    if update.message.text == bt.buttons['Критикал'][0]:
+    if update.message.text == bt.buttons['Критикал'][0]: # "Критикал" : ['Получать уведомления', 'Не получать уведомления']
         return run(context)
     else:
         return relax(context)
 
 
 def relax(context):
-    queue = context.user_data['queue']
+    queue = context['queue']
 #    print(queue.jobs())
     list_jobs_by_name = queue.get_jobs_by_name('Work')
     try:
@@ -33,8 +33,8 @@ def relax(context):
 
 def neus(context):
     print(context)
-    queue = context.user_data['queue']
-    bot = context.user_data['bot']
+    queue = context['queue']
+    bot = context['bot']
     print('popal', queue.get_jobs_by_name('Work')[0].enabled)
     line = Line('first')
     count = 0
@@ -63,14 +63,15 @@ def neus(context):
             people_on_line = "ALARM!!! Никого нет на линии!"
 #        self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
         bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+#        return pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
 
 
 def run(context):
-    queue = context.user_data['queue']
+    queue = context['queue']
     try:
         auth.Auth()
-        response = queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
-        queue.get_jobs_by_name('Work')[0].enabled = True
+        queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+#        queue.get_jobs_by_name('Work')[0].enabled = True
         return "Уведомления включены\n"
     except:
         return "Что-то пошло не так, обратитесь к разработчику"

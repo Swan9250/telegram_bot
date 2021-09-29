@@ -6,10 +6,10 @@ buttons = {"Уведомления" :
               'Ежегодно', 'Ежемесячно', 'Еженедельно', 'Ежедневно', 'Одноразово'],
           "Кикер" :
               ['Вова выиграл', 'Егор выиграл', 'Откат'],
-          "Главные" :
-              ['/hello', '/help', '/start', '/stop'],
           "Критикал" :
-              ['Получать уведомления', 'Не получать уведомления']
+              ['Получать уведомления', 'Не получать уведомления'],
+          "Назад" :
+              ['Назад']
           }
 
 
@@ -35,7 +35,8 @@ def keyboardBack():
     """
     Делаем кнопку "Назад" на клавиатуре
     """
-    back = tg.KeyboardButton("Назад")
+    but = buttons['Назад']
+    back = tg.KeyboardButton(but[0])
     return [back]
 
 
@@ -48,20 +49,14 @@ def keyboardPeriod():
     month = tg.KeyboardButton(but[2])
     week = tg.KeyboardButton(but[3])
     day = tg.KeyboardButton(but[4])
-    return [year, month, week, day]
+    once = tg.KeyboardButton(but[5])
+    return [year, month, week, day, once]
 
 
 def keyboardNotify():
     """
     Делаем кнопку "Задать уведомление"
     """
-    notify = tg.KeyboardButton('Задать уведомление')
+    but = buttons['Уведомления']
+    notify = tg.KeyboardButton(but[0])
     return [notify]
-
-
-def keyboardMain():
-    hello = tg.KeyboardButton('/hello')
-    help = tg.KeyboardButton('/help')
-    start = tg.KeyboardButton('/start')
-    stop = tg.KeyboardButton('/stop')
-    return [hello, help, start, stop] # Подумать, нахера мне вообще эти кнопки
