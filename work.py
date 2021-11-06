@@ -32,9 +32,9 @@ def relax(context):
 
 
 def neus(context):
-    print(context)
-    queue = context['queue']
-    bot = context['bot']
+    print(context.job.context)
+    queue = context.job.context['queue']
+    bot = context.job.context['bot']
     print('popal', queue.get_jobs_by_name('Work')[0].enabled)
     line = Line('first')
     count = 0
