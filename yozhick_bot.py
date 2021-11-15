@@ -58,61 +58,62 @@ class Main:
         self.bot.sendMessage(Main.swans_chat_id, response)
 
 
-    def relax(self, context):
+#    def relax(self, context):
 #        print(self.queue.jobs())
-        list_jobs_by_name = self.queue.get_jobs_by_name('Work')
-        for job in list_jobs_by_name:
-            print(job.enabled)
-            job.schedule_removal()
-            print(job.enabled)
+#        list_jobs_by_name = self.queue.get_jobs_by_name('Work')
+#        for job in list_jobs_by_name:
+#            print(job.enabled)
+#            job.schedule_removal()
+#            print(job.enabled)
 
 
     
-    def neus(self, context: CallbackContext):
-        print('popal', self.queue.get_jobs_by_name('Work')[0].enabled)
+#    def neus(self, context: CallbackContext):
+#        print('popal', self.queue.get_jobs_by_name('Work')[0].enabled)
 #        enter = auth.Auth()
-        line = Line('first')
-        count = 0
-        workers_on_line = []
-        tickets_over_20 = []
-        for i in line.get():
-            dattim = i['in_queue_from']
-            if i['assignee_name'] != '':
-                workers_on_line.append(i['assignee_name'])
-            tim = dattim[dattim.find('T') + 1:dattim.find('+')]
-            cut = tim.split(':')
-            hour = int(cut[0])
-            minute = int(cut[1])
-            if (datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute > 20:
-                tickets_over_20.append([i['subject'], str((datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute) + ' мин', i['assignee_name']])
-                count += 1
-        if count > 0:
-            pizdit = f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут"
-            beauty_tickets = '\n'.join(str(i) for i in tickets_over_20)
-            tickets_count = f"Тикеты больше 20 мин:\n {beauty_tickets}"
-            people_on_line = ''
+#        line = Line('first')
+#        count = 0
+#        workers_on_line = []
+#        tickets_over_20 = []
+#        for i in line.get():
+#            dattim = i['in_queue_from']
+#            if i['assignee_name'] != '':
+#                workers_on_line.append(i['assignee_name'])
+#            tim = dattim[dattim.find('T') + 1:dattim.find('+')]
+#            cut = tim.split(':')
+#            hour = int(cut[0])
+#            minute = int(cut[1])
+#            if (datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute > 20:
+#                tickets_over_20.append([i['subject'], str((datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute) + ' мин', i['assignee_name']])
+#                count += 1
+#        if count > 0:
+#            pizdit = f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут"
+#            beauty_tickets = '\n'.join(str(i) for i in tickets_over_20)
+#            tickets_count = f"Тикеты больше 20 мин:\n {beauty_tickets}"
+#            people_on_line = ''
 #            self.bot.sendMessage(self.neustroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
 #            self.bot.sendMessage(self.neustroev_chat_id, f"тикеты больше 20 мин: {tickets_over_20}")
-            if len(workers_on_line) != 0: 
-                beauty_people = '\n'.join(workers_on_line)
-                people_on_line = f"Сотрудники на линии:\n{beauty_people}"
+#            if len(workers_on_line) != 0: 
+#                beauty_people = '\n'.join(workers_on_line)
+#                people_on_line = f"Сотрудники на линии:\n{beauty_people}"
 #                self.bot.sendMessage(self.neustroev_chat_id, f"Сотрудники на линии: {workers_on_line}")
-            else:
-                people_on_line = "ALARM!!! Никого нет на линии!"
+#            else:
+#                people_on_line = "ALARM!!! Никого нет на линии!"
 #                self.bot.sendMessage(self.neustroev_chat_id, "ALARM!!! Никого нет на линии!")
-            self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+#            self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 #            self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 
 
-    def neustroev(self,update, context: CallbackContext):
-        enter = auth.Auth()
-        if enter is not None:
-            context.user_data['enter'] = enter
-            self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
-            self.queue.get_jobs_by_name('Work')[0].enabled = True
-            self.bot.sendMessage(self.getChatId(update), 'Принято')
-        else:
-            self.bot.sendMessage(self.getChatId(update), 'Что-то пошло не так, нажми ещё раз')
+#    def neustroev(self,update, context: CallbackContext):
+#        enter = auth.Auth()
+#        if enter is not None:
+#            context.user_data['enter'] = enter
+#            self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+#            self.queue.get_jobs_by_name('Work')[0].enabled = True
+#            self.bot.sendMessage(self.getChatId(update), 'Принято')
+#        else:
+#            self.bot.sendMessage(self.getChatId(update), 'Что-то пошло не так, нажми ещё раз')
+
 #        print(self.queue.get_jobs_by_name('Work'))
 #        context.user_data['enter'] = auth.Auth()  # Может быть None, засунуть в try/except
 #        self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
@@ -220,8 +221,8 @@ class Main:
         """
 #        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
 #                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
-        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
+#        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+#                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
         self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
 #        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 8, minute=0, second=00), context=update)
             

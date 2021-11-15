@@ -69,8 +69,9 @@ class Main:
 
 
     def work(self, update, context):
-        but = buttons['Критикал']
-        if update.message.text == but[0] or update.message.text == but[2]:
+        print('Нажал')
+        but = bt.buttons['Критикал']
+        if update.message.text == but[0]:
             self.neustroev(update, context)
         else:
             self.relax(context)
@@ -79,6 +80,7 @@ class Main:
 
     def relax(self, context):
 #        print(self.queue.jobs())
+        print('relax')
         list_jobs_by_name = self.queue.get_jobs_by_name('Work')
         for job in list_jobs_by_name:
             print(job.enabled)
@@ -120,16 +122,18 @@ class Main:
                 people_on_line = "ALARM!!! Никого нет на линии!"
 #                self.bot.sendMessage(self.neustroev_chat_id, "ALARM!!! Никого нет на линии!")
             self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-#            self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+            self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 
 
     def neustroev(self,update, context: CallbackContext):
+        print('work')
         enter = auth.Auth()
         if enter is not None:
             context.user_data['enter'] = enter
             self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
             self.queue.get_jobs_by_name('Work')[0].enabled = True
             self.bot.sendMessage(self.getChatId(update), 'Принято')
+            self.bot.sendMessage(Main.swans_chat_id, "Миша подключил уведомления")
         else:
             self.bot.sendMessage(self.getChatId(update), 'Что-то пошло не так, нажми ещё раз')
 #        print(self.queue.get_jobs_by_name('Work'))
@@ -255,12 +259,12 @@ class Main:
         context.bot.send_poll(Main.swans_chat_id, question="Обед", options=['13:00', '13:30', '14:00', '14:30', '15:00', 'позже 15'], is_anonymous=False, allows_multiple_answers=True)
 
 
-    def medicine(self, context: CallbackContext):
-        """
-        Сообщение, используемое в захардкоженных заданиях
-        """
-        message = "Выпей таблетки"
-        context.bot.send_message(Main.swans_chat_id, message)
+#    def medicine(self, context: CallbackContext):
+#        """
+#        Сообщение, используемое в захардкоженных заданиях
+#        """
+#        message = "Выпей таблетки"
+#        context.bot.send_message(Main.swans_chat_id, message)
 
     def cronTasks(self, update, *args):
         """
@@ -268,8 +272,8 @@ class Main:
         """
 #        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
 #                                    time=datetime.time(hour = 10, minute=30, second=00), context=update)
-        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
-                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
+#        self.queue.run_daily(self.medicine, days = (0, 1, 2, 3, 4, 5, 6),
+#                                    time=datetime.time(hour = 15, minute=30, second=00), context=update)
         self.queue.run_daily(self.poll, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 9, minute=0, second=00), context=update)
 #        self.queue.run_daily(self.neustroev, days = (0, 1, 2, 3, 4), time=datetime.time(hour = 8, minute=0, second=00), context=update)
             
@@ -314,7 +318,7 @@ class Main:
         self.dispatcher.add_handler(CommandHandler("stop", self.stop))
         self.dispatcher.add_handler(MessageHandler(Filters.regex('^/.*'), self.default))
         self.dispatcher.add_handler(MessageHandler(Filters.text(bt.buttons['Кикер']), self.kicker))
-        self.dispatcher.add_handler(MessageHandler(Filters.text(buttons['Критикал']), self.work))
+        self.dispatcher.add_handler(MessageHandler(Filters.text(bt.buttons['Критикал']), self.work))
         self.dispatcher.add_handler(MessageHandler(Filters.text(Main.phrases), self.notifications))
         self.dispatcher.add_handler(MessageHandler(Filters.regex('^.*:.*:.* .*:.*:.*$'), self.makeFirst))
         self.dispatcher.add_handler(MessageHandler(Filters.regex('^Уведомление:'), self.notify))
@@ -347,6 +351,7 @@ class Main:
             context.user_data["keyboard"] = self.keyboard(bt.keyboardMain(), bt.keyboardNotify(), bt.keyboardKicker(), bt.keyboardWork())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.id == Main.neustroev_chat_id:
+            print('Миша')
             context.user_data["keyboard"] = self.keyboard(bt.keyboardWork())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Доминирование':
@@ -360,6 +365,7 @@ class Main:
 #            print(self.getChatId(update))
         else:
 #            print(update.message)
+            print('Кто-то никуда не попал')
             context.user_data["keyboard"] = self.keyboard(bt.keyboardMain())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
 

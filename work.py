@@ -32,9 +32,9 @@ def relax(context):
 
 
 def neus(context):
-    print(context)
-    queue = context['queue']
-    bot = context['bot']
+    print(context.job.context)
+    queue = context.job.context['queue']
+    bot = context.job.context['bot']
     print('popal', queue.get_jobs_by_name('Work')[0].enabled)
     line = Line('first')
     count = 0
@@ -62,8 +62,8 @@ def neus(context):
         else:
             people_on_line = "ALARM!!! Никого нет на линии!"
 #        self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-        bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-#        return pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
+#        bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+        return pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
 
 
 def run(context):
