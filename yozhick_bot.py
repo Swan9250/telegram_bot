@@ -5,10 +5,10 @@ import telegram as tg
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters#JobQueue
 from telegram.ext import CallbackQueryHandler
 import os, sys
-p = os.path.abspath('../beget/')
-sys.path.insert(1, p)
-from api.base import auth
-from api.internal import Line
+#p = os.path.abspath('../beget/')
+#sys.path.insert(1, p)
+#from api.base import auth
+#from api.internal import Line
 import kicker, buttons as bt, work as wrk
 
 __author__ = 'Vladimir Stanotin'
@@ -290,24 +290,23 @@ class Main:
 #        print(self.dispatcher) == update
         print(update)
         if update.message.chat.id == Main.swans_chat_id:
-            context.user_data["keyboard"] = self.keyboard(bt.keyboardMain(), bt.keyboardNotify(), bt.keyboardKicker(), bt.keyboardWork())
+            context.user_data["keyboard"] = self.keyboard(bt.keyboardNotify(), bt.keyboardKicker(), bt.keyboardWork())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.id == Main.neustroev_chat_id:
             context.user_data["keyboard"] = self.keyboard(bt.keyboardWork())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Доминирование':
-            context.user_data["keyboard"] = self.keyboard(bt.keyboardMain(), bt.keyboardKicker(), bt.keyboardNotify())
+            context.user_data["keyboard"] = self.keyboard(bt.keyboardKicker(), bt.keyboardNotify())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Че кого':
-            context.user_data["keyboard"] = self.keyboard(bt.keyboardMain(), bt.keyboardNotify())
+            context.user_data["keyboard"] = self.keyboard(bt.keyboardNotify())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.title == 'Идеология мертва':
             self.bot.sendMessage(self.getChatId(update), hello, reply_to_message_id = update.message.message_id)
 #            print(self.getChatId(update))
         else:
 #            print(update.message)
-            context.user_data["keyboard"] = self.keyboard(bt.keyboardMain())
-            self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
+            self.bot.sendMessage(self.getChatId(update), hello, reply_to_message_id = update.message.message_id)
 
 
     def start(self, update:tg.Update, context:CallbackContext):

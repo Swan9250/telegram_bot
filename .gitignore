@@ -5,3 +5,6 @@ yozhick_token
 __pycache__
 chat_update.example
 *.bak
+auth.py
+request.py
+Line.py
