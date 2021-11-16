@@ -14,6 +14,9 @@ buttons = {"Уведомления" :
 
 
 def keyboardKicker():
+    """
+    Делаем кнопки выбора победившего, возврата.
+    """
     but = buttons['Кикер']
     Vwin = tg.KeyboardButton(but[0])
     Ewin = tg.KeyboardButton(but[1])
@@ -23,7 +26,7 @@ def keyboardKicker():
 
 def keyboardWork():
     """
-    Делаем кнопки периодов нотификаций
+    Делаем кнопки начала и конца работы.
     """
     but = buttons['Критикал']
     start_work = tg.KeyboardButton(but[0])
@@ -33,7 +36,7 @@ def keyboardWork():
 
 def keyboardBack():
     """
-    Делаем кнопку "Назад" на клавиатуре
+    Делаем кнопку "Назад" на клавиатуре.
     """
     but = buttons['Назад']
     back = tg.KeyboardButton(but[0])
@@ -42,7 +45,7 @@ def keyboardBack():
 
 def keyboardPeriod():
     """
-    Делаем кнопки периодов нотификаций
+    Делаем кнопки периодов нотификаций.
     """
     but = buttons['Уведомления']
     year = tg.KeyboardButton(but[1])
@@ -55,7 +58,7 @@ def keyboardPeriod():
 
 def keyboardNotify():
     """
-    Делаем кнопку "Задать уведомление"
+    Делаем кнопку "Задать уведомление".
     """
     but = buttons['Уведомления']
     notify = tg.KeyboardButton(but[0])

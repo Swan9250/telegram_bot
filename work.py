@@ -37,7 +37,6 @@ def neus(context):
     print(context.job.context)
     queue = context.job.context['queue']
     bot = context.job.context['bot']
-    auth = context.job.context['auth']
     print('popal', queue.get_jobs_by_name('Work')[0].enabled)
     line = Line('first')
     count = 0
@@ -65,7 +64,7 @@ def neus(context):
         else:
             people_on_line = "ALARM!!! Никого нет на линии!"
 #        self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-        bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
+        bot.sendMessage(177870052, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
 #        return pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line
 
 
@@ -73,9 +72,12 @@ def run(context):
     queue = context['queue']
     print('Очередь', queue)
     try:
-        context['auth'] = auth.Auth()
-        queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+        auth.Auth()
+        if len(queue.get_jobs_by_name('Work')) == 0:
+            queue.run_repeating(neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
+        else:
+            return "Задание уже запущено.\n"
 #        queue.get_jobs_by_name('Work')[0].enabled = True
-        return "Уведомления включены\n"
+        return "Уведомления включены.\n"
     except:
-        return "Что-то пошло не так, обратитесь к разработчику"
+        return "Что-то пошло не так, обратитесь к разработчику."

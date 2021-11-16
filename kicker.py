@@ -72,24 +72,40 @@ def Vwin(update, context, result, con):
 def Ewin(update, context, result, con):
     cursor = con.cursor()
     Ewin = result
-    if result is not None:
-        e = int(result[2:result.find(":")])
-        v = int(result[result.find(":") + 1:result.rfind("В") - 1])
-        Ewin = f'E {e + 1}:{v} В'
+    err = ''
 
-    cursor.execute("""INSERT INTO kicker(message_from_id, message_from_username, message_from_first_name, schet) VALUES(%s, %s, %s, %s)""",
+
+    e = int(result[2:result.find(":")])
+    v = int(result[result.find(":") + 1:result.rfind("В") - 1])
+    Ewin = f'E {e + 1}:{v} В'
+
+#    if result is not None:
+#        e = int(result[2:result.find(":")])
+#        v = int(result[result.find(":") + 1:result.rfind("В") - 1])
+#        Ewin = f'E {e + 1}:{v} В'
+
+    try:
+        cursor.execute("""INSERT INTO kicker(message_from_id, message_from_username, message_from_first_name, schet) VALUES(%s, %s, %s, %s)""",
             (update.message.from_user.id, update.message.from_user.username, update.message.from_user.first_name, Ewin))
-    con.commit()
-    return Ewin
+        con.commit()
+    except:
+        err = 'Значение не записалось в базу\n'
+    finally:
+        return Ewin
 
 def Otkat(update, context, result, con, search_last):
     cursor = con.cursor()
-    cursor.execute("""DELETE FROM kicker ORDER BY id DESC LIMIT 1""")
-    con.commit()
-    cursor.execute(search_last)
-    btw_result = cursor.fetchone()
-    if btw_result is not None:
-        result = btw_result[0]
-    else:
-        result = f'Е 0:0 В'
-    return result
+    err = ''
+    try:
+        cursor.execute("""DELETE FROM kicker ORDER BY id DESC LIMIT 1""")
+        con.commit()
+        cursor.execute(search_last)
+        btw_result = cursor.fetchone()
+        if btw_result is not None:
+            result = btw_result[0]
+        else:
+            result = f'Е 0:0 В'
+    except:
+        err = 'Не удалось удалить значение\n'
+    finally:
+        return result

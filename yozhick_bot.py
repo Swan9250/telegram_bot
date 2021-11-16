@@ -12,7 +12,7 @@ import os, sys
 import kicker, buttons as bt, work as wrk
 
 __author__ = 'Vladimir Stanotin'
-__version__ = 0.35
+__version__ = 0.4
 
 
 phrases = ['Задать уведомление',
@@ -24,9 +24,9 @@ class Main:
     All code of bot ideas
     """
 
-    swans_chat_id = 177870052
-    neustroev_chat_id = 749074706
-    phrases = phrases
+    swans_chat_id = 177870052 # Надо придумать, как от этого избавиться
+    neustroev_chat_id = 749074706 # Надо придумать, как от этого избавиться
+    phrases = phrases # Надо от этого избавиться
 
 
     def __init__(self, token):
@@ -286,10 +286,12 @@ class Main:
         """
         Православное приветствие.
         """
+
         hello = f'Hello @{update.effective_user.username}'
+        self.add_user_to_base(update)
 #        print(self.dispatcher) == update
         print(update)
-        if update.message.chat.id == Main.swans_chat_id:
+        if update.message.chat.username == "Swan9250":
             context.user_data["keyboard"] = self.keyboard(bt.keyboardNotify(), bt.keyboardKicker(), bt.keyboardWork())
             self.bot.sendMessage(self.getChatId(update), hello, reply_markup = context.user_data["keyboard"], reply_to_message_id = update.message.message_id)
         elif update.message.chat.id == Main.neustroev_chat_id:
@@ -331,13 +333,43 @@ class Main:
         pass
 
 
+    def add_user_to_base(self, update):
+        date = datetime.datetime.now()
+        con = self.base_connect()
+        cursor = con.cursor()
+        try:
+            cursor.execute("""SELECT * from person_info""")
+            remembered_users = cursor.fetchall()
+            exist = False
+            for user in remembered_users:
+                if update.message.chat.id == user[1]:
+                    exist = True
+            if exist == False:
+                if update.message.chat.type == 'private':
+                    cursor.execute("""INSERT INTO person_info(chat_id, first_name, last_name, type, username, date) VALUES(%s, %s, %s, %s, %s, %s)""",
+                                                  (update.message.chat.id, update.message.chat.first_name, update.message.chat.last_name, update.message.chat.type, update.message.chat.username, date))
+                elif update.message.chat.type == 'group':
+                    cursor.execute("""INSERT INTO person_info(chat_id, first_name, last_name, type, username, date, title) VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+                                                  (update.message.chat.id, update.message.from_user.first_name, update.message.from_user.last_name, update.message.chat.type, update.message.from_user.username, date, update.message.chat.title))
+                con.commit()
+            else:
+                print('User already exists')
+        except:
+            print('Error while writing user into base')
+
+
+
     def base_connect(self):
+        with open('db_conn', 'r') as c:
+            data = c.read()
+            data = json.loads(data)
+
         try:
             con = mysql.connector.connect(
-                    host='localhost',
-                    user='bot',
-                    password='telegram_bot',
-                    database='telegram_bot',
+                    host = data['host'],
+                    user = data['user'],
+                    password = data['password'],
+                    database = data['database'],
                     auth_plugin='mysql_native_password',
                     )
             return con
