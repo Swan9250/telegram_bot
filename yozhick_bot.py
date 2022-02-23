@@ -5,11 +5,12 @@ import telegram as tg
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters#JobQueue
 from telegram.ext import CallbackQueryHandler
 import os, sys
+import random
 #p = os.path.abspath('../beget/')
 #sys.path.insert(1, p)
 #from api.base import auth
 #from api.internal import Line
-import kicker, buttons as bt, work as wrk
+import kicker, buttons as bt, work as wrk, hello
 
 __author__ = 'Vladimir Stanotin'
 __version__ = 0.4
@@ -287,7 +288,10 @@ class Main:
         Православное приветствие.
         """
 
-        hello = f'Hello @{update.effective_user.username}'
+        hello_num = random.randrange(1, len(hello.hello_list) - 1)
+        hello = hello.hello_list[hello_num]
+
+        #hello = f'Hello @{update.effective_user.username}'
         self.add_user_to_base(update)
 #        print(self.dispatcher) == update
         print(update)
