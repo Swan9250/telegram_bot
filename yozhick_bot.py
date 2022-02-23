@@ -10,7 +10,7 @@ import random
 #sys.path.insert(1, p)
 #from api.base import auth
 #from api.internal import Line
-import kicker, buttons as bt, work as wrk, notifications as noti, h
+import kicker, buttons as bt, work as wrk, notifications as noti, hello as h
 
 __author__ = 'Vladimir Stanotin'
 __version__ = 0.4
