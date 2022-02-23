@@ -9,7 +9,7 @@ import os, sys
 #sys.path.insert(1, p)
 #from api.base import auth
 #from api.internal import Line
-import kicker, buttons as bt, work as wrk
+import kicker, buttons as bt, work as wrk, notifications as noti
 
 __author__ = 'Vladimir Stanotin'
 __version__ = 0.4
@@ -42,14 +42,7 @@ class Main:
         self.updater.idle()
 
 
-#    def work(self, update, context):
-#        but = bt.buttons['Критикал']
-#        if update.message.text == but[0] or update.message.text == but[2]:
-#            self.neustroev(update, context)
-#        else:
-#            self.relax(context)
-#            self.bot.sendMessage(self.getChatId(update), 'Принято')
-
+#### Блок уведомлений по тикетам
 
     def work(self, update, context):
         context.user_data['queue'] = self.queue
@@ -58,71 +51,22 @@ class Main:
         self.bot.sendMessage(Main.swans_chat_id, response)
 
 
-#    def relax(self, context):
-#        print(self.queue.jobs())
-#        list_jobs_by_name = self.queue.get_jobs_by_name('Work')
-#        for job in list_jobs_by_name:
-#            print(job.enabled)
-#            job.schedule_removal()
-#            print(job.enabled)
-
-
-    
-#    def neus(self, context: CallbackContext):
-#        print('popal', self.queue.get_jobs_by_name('Work')[0].enabled)
-#        enter = auth.Auth()
-#        line = Line('first')
-#        count = 0
-#        workers_on_line = []
-#        tickets_over_20 = []
-#        for i in line.get():
-#            dattim = i['in_queue_from']
-#            if i['assignee_name'] != '':
-#                workers_on_line.append(i['assignee_name'])
-#            tim = dattim[dattim.find('T') + 1:dattim.find('+')]
-#            cut = tim.split(':')
-#            hour = int(cut[0])
-#            minute = int(cut[1])
-#            if (datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute > 20:
-#                tickets_over_20.append([i['subject'], str((datetime.datetime.now() - datetime.timedelta(hours = hour, minutes = minute)).minute) + ' мин', i['assignee_name']])
-#                count += 1
-#        if count > 0:
-#            pizdit = f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут"
-#            beauty_tickets = '\n'.join(str(i) for i in tickets_over_20)
-#            tickets_count = f"Тикеты больше 20 мин:\n {beauty_tickets}"
-#            people_on_line = ''
-#            self.bot.sendMessage(self.neustroev_chat_id, f"Пора пиздить ребят: на линии {count} тикетов больше 20 минут")
-#            self.bot.sendMessage(self.neustroev_chat_id, f"тикеты больше 20 мин: {tickets_over_20}")
-#            if len(workers_on_line) != 0: 
-#                beauty_people = '\n'.join(workers_on_line)
-#                people_on_line = f"Сотрудники на линии:\n{beauty_people}"
-#                self.bot.sendMessage(self.neustroev_chat_id, f"Сотрудники на линии: {workers_on_line}")
-#            else:
-#                people_on_line = "ALARM!!! Никого нет на линии!"
-#                self.bot.sendMessage(self.neustroev_chat_id, "ALARM!!! Никого нет на линии!")
-#            self.bot.sendMessage(Main.neustroev_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-#            self.bot.sendMessage(Main.swans_chat_id, pizdit + '\n\n' + tickets_count + '\n\n' + people_on_line)
-
-
-#    def neustroev(self,update, context: CallbackContext):
-#        enter = auth.Auth()
-#        if enter is not None:
-#            context.user_data['enter'] = enter
-#            self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
-#            self.queue.get_jobs_by_name('Work')[0].enabled = True
-#            self.bot.sendMessage(self.getChatId(update), 'Принято')
-#        else:
-#            self.bot.sendMessage(self.getChatId(update), 'Что-то пошло не так, нажми ещё раз')
-
-#        print(self.queue.get_jobs_by_name('Work'))
-#        context.user_data['enter'] = auth.Auth()  # Может быть None, засунуть в try/except
-#        self.queue.run_repeating(self.neus, 60, last=datetime.time(hour = 17, minute = 0, second = 00), context=context, name='Work')
-#        self.queue.get_jobs_by_name('Work')[0].enabled = True # Джоба тоже может быть None
-#        print(self.queue.get_jobs_by_name('Work')[0].enabled)
+#### Конец блока уведомлений по тикетам
 
 
 #### Блок нотификаций
 
+
+    def notifications(self, update, context):
+        context.user_data['notify_buttons'] = bt.buttons['Уведомления']
+        context.user_data['bot'] = self.bot
+        context.user_data['button'] = update.message.text
+        
+        response = noti.distributor(update, context)
+        print(response)
+        print(context.user_data)
+        self.bot.sendMessage(self.getChatId(update), response, reply_markup = self.keyboard(bt.keyboardPeriod(), bt.keyboardBack()), reply_to_message_id = update.message.message_id)
+    
 
     def getText(self, context):
         job = context.job
@@ -142,14 +86,14 @@ class Main:
             context.user_data['data'] = first
             context.user_data['Back'] = update.message.text
 
-    def notifications(self, update, context: CallbackContext):
-        if update.message.text == Main.phrases[0]:
-            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(bt.keyboardPeriod(), bt.keyboardBack()), reply_to_message_id = update.message.message_id)
-            context.user_data['Back'] = update.message.text
-        else:
-            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(bt.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
-            context.user_data['period'] = update.message.text
-            context.user_data['Back'] = update.message.text
+#    def notifications(self, update, context: CallbackContext):
+#        if update.message.text == Main.phrases[0]:
+#            self.bot.sendMessage(self.getChatId(update), "Выбери период", reply_markup = self.keyboard(bt.keyboardPeriod(), bt.keyboardBack()), reply_to_message_id = update.message.message_id)
+#            context.user_data['Back'] = update.message.text
+#        else:
+#            self.bot.sendMessage(self.getChatId(update), "Укажи дату и время первого запуска", reply_markup = self.keyboard(bt.keyboardBack(), input_field_placeholder = 'Дата: гггг:мм:дд чч:мм:сс'), reply_to_message_id = update.message.message_id)
+#            context.user_data['period'] = update.message.text
+#            context.user_data['Back'] = update.message.text
 
     def notify(self, update, context):
         if 'Уведомление:' in update.message.text:
@@ -347,10 +291,27 @@ class Main:
             if exist == False:
                 if update.message.chat.type == 'private':
                     cursor.execute("""INSERT INTO person_info(chat_id, first_name, last_name, type, username, date) VALUES(%s, %s, %s, %s, %s, %s)""",
-                                                  (update.message.chat.id, update.message.chat.first_name, update.message.chat.last_name, update.message.chat.type, update.message.chat.username, date))
+                                                  (
+                                                      update.message.chat.id,
+                                                      update.message.chat.first_name,
+                                                      update.message.chat.last_name,
+                                                      update.message.chat.type,
+                                                      update.message.chat.username,
+                                                      date
+                                                    )
+                                  )
                 elif update.message.chat.type == 'group':
                     cursor.execute("""INSERT INTO person_info(chat_id, first_name, last_name, type, username, date, title) VALUES(%s, %s, %s, %s, %s, %s, %s)""",
-                                                  (update.message.chat.id, update.message.from_user.first_name, update.message.from_user.last_name, update.message.chat.type, update.message.from_user.username, date, update.message.chat.title))
+                                                  (
+                                                      update.message.chat.id,
+                                                      update.message.from_user.first_name,
+                                                      update.message.from_user.last_name,
+                                                      update.message.chat.type,
+                                                      update.message.from_user.username,
+                                                      date,
+                                                      update.message.chat.title
+                                                   )
+                                  )
                 con.commit()
             else:
                 print('User already exists')
@@ -380,5 +341,4 @@ class Main:
 if __name__ == '__main__':
     with open('yozhick_token', 'r') as t:
         token = str(t.read())
-        print(token[:-1])
     Main(token[:-1])
