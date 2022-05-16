@@ -12,3 +12,4 @@ db_conn
 migrations
 group_chat_update.example
 json_to_beauty.py
+mysql

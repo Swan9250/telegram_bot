@@ -10,7 +10,7 @@ import random
 #sys.path.insert(1, p)
 #from api.base import auth
 #from api.internal import Line
-import kicker, buttons as bt, work as wrk, notifications as noti, hello as h
+import kicker, buttons as bt, notifications as noti, hello as h # work as wrk
 
 __author__ = 'Vladimir Stanotin'
 __version__ = 0.4
@@ -290,7 +290,7 @@ class Main:
             remembered_users = cursor.fetchall()
             exist = False
             for user in remembered_users:
-                if update.message.chat.id == user[1]:
+                if update.message.chat.id == user[0]:
                     exist = True
             if exist == False:
                 if update.message.chat.type == 'private':
