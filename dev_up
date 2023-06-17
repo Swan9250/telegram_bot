@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+if [ -n "$1" ]; then
+  case $1 in
+      -r|--disable-dry-run)
+          nohup python3.11 app/init.py --dev -r &
+          ;;
+      -*|--*)
+          echo "Неизвестная опция $1"
+          exit 1
+          ;;
+  esac
+else
+  echo "Это DRY RUN mode, для выключения DRY RUN используй опцию -r"
+  nohup python3.11 app/init.py --dev &
+fi
+pgrep -l init.py
