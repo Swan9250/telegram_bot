@@ -35,10 +35,10 @@ class Migration01:
 
     @staticmethod
     def parse_args():
-        parser_obj = argparse.ArgumentParser()
+        parser_obj = argparse.ArgumentParser(exit_on_error=False)
         group = parser_obj.add_mutually_exclusive_group(required=True)
-        group.add_argument('up', action='store_true')
-        group.add_argument('down', action='store_true')
+        group.add_argument('up', nargs='?')
+        group.add_argument('down', nargs='?')
         return parser_obj.parse_args()
 
 
