@@ -6,7 +6,7 @@ import path
 
 import base.logger as logging
 
-from base.bot.runner import Runner
+from app.base.bot.runner import Runner
 
 
 class Init:

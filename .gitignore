@@ -9,7 +9,12 @@ auth.py
 request.py
 Line.py
 db_conn
-migrations
 group_chat_update.example
 json_to_beauty.py
-mysql
+db_root
+*.json
+.pytest_cache
+*.log*
+prototypes
+.idea
+nohup.out
