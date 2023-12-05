@@ -1,0 +1,34 @@
+Структура проекта:
+.deployer/
+    prod/env/
+    dev/env/
+app/
+    base/
+        bot/
+            base_controller.py
+        keyboard/
+            base_controller.py
+    handlers/
+        commandHandlers/
+        messageHandlers/
+    lib/
+        games/
+            sudoku/
+                controllers/
+                views/
+                models/
+                keyboards/
+    init.py
+.gitignore
+up
+README.md
+
+Запихнуть кнопки в базу?
+
+Создать таблицу users:
+chat_id - инфа для бота
+username - Имя для меня
+sex - male/female влияет на приветствие от бота
+rights - права (owner, relative, friend, familiar, unknown) - от прав зависит показываемая клавиатура и модель общения
+Что ещё? Или просто расширить таблицу person_info? (Плохая идея, так как тут мы получаем инфу только от бота)
+Получается, users будет заполняться вручную...
